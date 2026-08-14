@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Session - SmartAssess AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+</head>
+<body style="background: var(--bg-dark);">
+
+    <!-- Top Navigation Header -->
+    <header class="top-navbar" style="background: #ffffff;">
+        <div class="brand">
+            <div class="brand-icon">🎓</div>
+            SmartAssess Test Engine
+        </div>
+        <div id="active-timer-box" style="display:flex; align-items:center; gap:0.5rem; font-weight:800; font-size:1.1rem; color:#d97706;">
+            ⏳ Time Remaining: <span id="timer-display" style="font-family:monospace; font-size:1.25rem;">00:00</span>
+        </div>
+    </header>
+
+    <div class="content-body" style="max-width:900px; margin:0 auto; padding-top:2rem;">
+
+        <!-- 1. Pre-start Test Details Card -->
+        <div id="test-prestart-card" class="card" style="text-align:center; padding:3rem 2rem; background:#ffffff;">
+            <div class="brand-icon" style="width:60px; height:60px; margin:0 auto 1.5rem auto; font-size:1.75rem;">📝</div>
+            <h1 id="test-title" style="font-size:1.75rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">Loading Test Details...</h1>
+            <p id="test-subject" style="color:#b48a3c; font-size:1.1rem; font-weight:800; margin-bottom:0.25rem;">-</p>
+            <p id="test-faculty" style="color:#334155; font-size:0.92rem; font-weight:600; margin-bottom:0.75rem;">-</p>
+            <p id="test-description" style="color:#1e293b; font-size:0.98rem; max-width:600px; margin:0 auto 1.5rem auto; line-height:1.6;"></p>
+
+            <div style="display:flex; justify-content:center; gap:2rem; margin-bottom:2rem; flex-wrap:wrap;">
+                <div style="background:#f8fafc; padding:1rem 1.5rem; border-radius:var(--radius-md); border:1.5px solid #cbd5e1; min-width:140px;">
+                    <div style="font-size:0.8rem; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">DURATION</div>
+                    <div id="test-duration" style="font-weight:800; font-size:1.25rem; color:#0f172a; margin-top:0.25rem;">-</div>
+                </div>
+                <div style="background:#f8fafc; padding:1rem 1.5rem; border-radius:var(--radius-md); border:1.5px solid #cbd5e1; min-width:140px;">
+                    <div style="font-size:0.8rem; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">QUESTIONS</div>
+                    <div id="test-count" style="font-weight:800; font-size:1.25rem; color:#0f172a; margin-top:0.25rem;">-</div>
+                </div>
+                <div style="background:#f8fafc; padding:1rem 1.5rem; border-radius:var(--radius-md); border:1.5px solid #cbd5e1; min-width:140px;">
+                    <div style="font-size:0.8rem; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">TOTAL MARKS</div>
+                    <div id="test-marks" style="font-weight:800; font-size:1.25rem; color:#059669; margin-top:0.25rem;">-</div>
+                </div>
+            </div>
+
+            <div style="background:#f1f5f9; border:1.5px solid #cbd5e1; padding:1.25rem; border-radius:var(--radius-md); max-width:600px; margin:0 auto 2rem auto; text-align:left; font-size:0.92rem; line-height:1.6; color:#0f172a;">
+                <strong style="color:#0f172a;">📋 Instructions:</strong>
+                <ul style="margin-left:1.25rem; margin-top:0.5rem; color:#1e293b;">
+                    <li>Ensure a stable internet connection. The timer starts immediately upon clicking "Start Test".</li>
+                    <li>Do not refresh or switch tabs during the test session. Tab switches are logged by anti-cheat monitors.</li>
+                    <li>Answers will automatically submit when the timer expires.</li>
+                </ul>
+            </div>
+
+            <button id="start-test-btn" class="btn btn-primary" style="font-size:1.1rem; padding:0.85rem 2.5rem;">🚀 Start Assessment Now</button>
+        </div>
+
+        <!-- 2. Active Test Question Card -->
+        <div id="test-active-view" style="display:none;">
+            <!-- Question Jump Grid -->
+            <div class="card" style="margin-bottom:1.5rem; padding:1rem; background:#ffffff;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+                    <span style="font-size:0.85rem; color:#475569; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">QUESTION NAVIGATOR</span>
+                    <span id="question-marks-badge" class="badge badge-published">3 Marks</span>
+                </div>
+                <div id="question-grid-nav" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <!-- Question buttons rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- Question & Options Box -->
+            <div class="card" style="margin-bottom:1.5rem; padding:2rem; background:#ffffff;">
+                <div id="question-progress-label" style="font-size:0.85rem; color:#b48a3c; font-weight:800; text-transform:uppercase; margin-bottom:0.75rem; letter-spacing:0.05em;">
+                    Question 1 of 10
+                </div>
+
+                <h2 id="question-text" style="font-size:1.3rem; font-weight:800; color:#0f172a; line-height:1.5; margin-bottom:1.5rem;">
+                    Loading question...
+                </h2>
+
+                <div id="options-container">
+                    <!-- Option cards rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <button id="prev-btn" class="btn btn-secondary" onclick="navigateQuestion(-1)">← Previous</button>
+                <button id="next-btn" class="btn btn-primary" onclick="navigateQuestion(1)">Next Question →</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/test.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', initTestPage);
+    </script>
+</body>
+</html>

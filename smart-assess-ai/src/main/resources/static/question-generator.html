@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Question Generator & Review - SmartAssess AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="faculty-dashboard.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                SmartAssess
+            </a>
+            <ul class="nav-links">
+                <li class="nav-item"><a href="faculty-dashboard.html">📊 Dashboard</a></li>
+                <li class="nav-item active"><a href="question-generator.html">✨ AI Generator</a></li>
+                <li class="nav-item"><a href="question-bank.html">📚 Question Bank</a></li>
+                <li class="nav-item"><a href="create-assessment.html">📝 New Assessment</a></li>
+                <li class="nav-item"><a href="analytics.html">📈 Class Analytics</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-navbar">
+                <h2 style="font-weight: 700; font-size: 1.25rem;">AI MCQ Generator & Review</h2>
+                <div class="user-profile">
+                    <span class="user-badge" id="user-role-display">FACULTY</span>
+                    <span id="user-name-display" style="font-weight: 600;">Dr. Sarah Jenkins</span>
+                    <button class="btn btn-secondary" onclick="logout()" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- AI Generation Setup Form -->
+                <div class="card" style="margin-bottom:2rem; background: linear-gradient(135deg, rgba(180, 138, 60, 0.08), var(--bg-card));">
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem;">
+                        <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--secondary)); display:flex; align-items:center; justify-content:center; color:white; font-size:1.1rem;">✨</div>
+                        <div>
+                            <h3 style="font-size:1.1rem; font-weight:700;">Generate MCQs via Gemini AI</h3>
+                            <p style="color:var(--text-secondary); font-size:0.85rem;">Select course parameters to generate curriculum-aligned questions.</p>
+                        </div>
+                    </div>
+
+                    <form id="ai-generate-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select id="ai-subject" class="form-control" required onchange="loadTopicsForSubject(this.value)">
+                                <option value="">Select Subject...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Topic</label>
+                            <select id="ai-topic" class="form-control">
+                                <option value="">Select Topic...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Difficulty Level</label>
+                            <select id="ai-difficulty" class="form-control">
+                                <option value="EASY">EASY</option>
+                                <option value="MEDIUM" selected>MEDIUM</option>
+                                <option value="HARD">HARD</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Question Count</label>
+                            <input type="number" id="ai-count" class="form-control" value="5" min="1" max="15">
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1; margin-top:0.5rem;">
+                            <button type="submit" id="generate-btn" class="btn btn-primary">✨ Generate & Review Questions</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Published Test Link Banner (Generated directly) -->
+                <div id="quick-publish-banner" class="card" style="display:none; margin-bottom:1.5rem; background:linear-gradient(135deg, rgba(16,185,129,0.15), var(--bg-card)); border-color:var(--success);">
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <span style="font-size:1.5rem;">🎉</span>
+                        <h3 style="color:var(--success); font-size:1.2rem; font-weight:700;">Assessment Published Successfully!</h3>
+                    </div>
+                    <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.9rem;">Shareable Test Link for Students:</p>
+                    <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+                        <input type="text" id="quick-share-input" class="form-control" readonly style="flex:1; min-width:280px; font-weight:bold; color:var(--text-primary); font-family:monospace; background:#ffffff;">
+                        <button type="button" class="btn btn-primary" onclick="copyQuickLink()">Copy Link</button>
+                        <button type="button" class="btn btn-secondary" onclick="openQuickTest()">Open Test</button>
+                    </div>
+                </div>
+
+                <!-- Faculty Question Review & Approval Screen -->
+                <div id="review-section" style="display:none;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                        <div>
+                            <h3 style="font-size:1.2rem; font-weight:700;">Questions Review & Approval</h3>
+                            <p style="color:var(--text-secondary); font-size:0.85rem;">Review and edit questions, then click below to approve and generate your student test link.</p>
+                        </div>
+                        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                            <button class="btn btn-secondary" onclick="approveAllPending()">Approve All Questions</button>
+                            <button class="btn btn-primary" id="quick-create-btn" onclick="quickCreateAndPublishAssessment()">🚀 Create & Publish Test Link</button>
+                        </div>
+                    </div>
+
+                    <div id="questions-review-list" style="display:flex; flex-direction:column; gap:1.25rem;">
+                        <!-- Generated Questions Cards rendered here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        checkAuth('FACULTY');
+
+        let pendingQuestions = [];
+        let quickShareUrl = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const subjects = await apiFetch('/api/subjects');
+            if (subjects) {
+                const subSelect = document.getElementById('ai-subject');
+                subSelect.innerHTML = '<option value="">Select Subject...</option>';
+                subjects.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.innerText = s.name;
+                    subSelect.appendChild(opt);
+                });
+            }
+        });
+
+        async function loadTopicsForSubject(subjectId) {
+            const topicSelect = document.getElementById('ai-topic');
+            topicSelect.innerHTML = '<option value="">Select Topic...</option>';
+            if (!subjectId) return;
+
+            const topics = await apiFetch(`/api/topics?subjectId=${subjectId}`);
+            if (topics) {
+                topics.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.innerText = t.name;
+                    topicSelect.appendChild(opt);
+                });
+            }
+        }
+
+        document.getElementById('ai-generate-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const subjectId = document.getElementById('ai-subject').value;
+            const topicId = document.getElementById('ai-topic').value || null;
+            const difficulty = document.getElementById('ai-difficulty').value;
+            const count = parseInt(document.getElementById('ai-count').value, 10);
+
+            document.getElementById('quick-publish-banner').style.display = 'none';
+
+            try {
+                showLoading('#generate-btn');
+                const res = await apiFetch('/api/ai/generate-questions', {
+                    method: 'POST',
+                    body: JSON.stringify({ subjectId, topicId, difficulty, count })
+                });
+
+                hideLoading('#generate-btn');
+
+                if (res && res.questions) {
+                    // Replace pendingQuestions to guarantee subject isolation for current generation
+                    pendingQuestions = res.questions;
+                    showToast(res.message, 'success');
+                    renderReviewScreen();
+                }
+            } catch (err) {
+                hideLoading('#generate-btn');
+            }
+        };
+
+        function renderReviewScreen() {
+            const container = document.getElementById('questions-review-list');
+            const section = document.getElementById('review-section');
+            section.style.display = 'block';
+            container.innerHTML = '';
+
+            if (pendingQuestions.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:var(--text-muted);">No pending questions for review.</p>`;
+                return;
+            }
+
+            pendingQuestions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.position = 'relative';
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <span style="font-weight:700; color:var(--text-primary);">Question #${idx + 1} (${q.subject ? q.subject.name : ''})</span>
+                        <div>
+                            <span class="badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+                            <span class="badge" style="background:${q.approved ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)'}; color:${q.approved ? 'var(--success)' : 'var(--warning)'}; margin-left:0.5rem;">
+                                ${q.approved ? 'APPROVED' : 'PENDING REVIEW'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Question Text</label>
+                        <textarea class="form-control" id="q-text-${q.id}" rows="2">${q.questionText}</textarea>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+                        <div class="form-group">
+                            <label>Option A</label>
+                            <input type="text" class="form-control" id="q-optA-${q.id}" value="${q.optionA}">
+                        </div>
+                        <div class="form-group">
+                            <label>Option B</label>
+                            <input type="text" class="form-control" id="q-optB-${q.id}" value="${q.optionB}">
+                        </div>
+                        <div class="form-group">
+                            <label>Option C</label>
+                            <input type="text" class="form-control" id="q-optC-${q.id}" value="${q.optionC}">
+                        </div>
+                        <div class="form-group">
+                            <label>Option D</label>
+                            <input type="text" class="form-control" id="q-optD-${q.id}" value="${q.optionD}">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:0.75rem;">
+                        <div class="form-group">
+                            <label>Correct Answer</label>
+                            <select class="form-control" id="q-ans-${q.id}">
+                                <option value="A" ${q.correctAnswer === 'A' ? 'selected' : ''}>A</option>
+                                <option value="B" ${q.correctAnswer === 'B' ? 'selected' : ''}>B</option>
+                                <option value="C" ${q.correctAnswer === 'C' ? 'selected' : ''}>C</option>
+                                <option value="D" ${q.correctAnswer === 'D' ? 'selected' : ''}>D</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Explanation</label>
+                            <input type="text" class="form-control" id="q-exp-${q.id}" value="${q.explanation || ''}">
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1rem;">
+                        <button class="btn btn-danger" onclick="deletePendingQuestion(${q.id})" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Delete</button>
+                        <button class="btn btn-primary" onclick="saveAndApproveQuestion(${q.id})" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Save & Approve</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function saveAndApproveQuestion(id) {
+            const qText = document.getElementById(`q-text-${id}`).value;
+            const optA = document.getElementById(`q-optA-${id}`).value;
+            const optB = document.getElementById(`q-optB-${id}`).value;
+            const optC = document.getElementById(`q-optC-${id}`).value;
+            const optD = document.getElementById(`q-optD-${id}`).value;
+            const ans = document.getElementById(`q-ans-${id}`).value;
+            const exp = document.getElementById(`q-exp-${id}`).value;
+
+            const existing = pendingQuestions.find(q => q.id === id);
+            if (!existing) return;
+
+            const body = {
+                subjectId: existing.subject.id,
+                topicId: existing.topic ? existing.topic.id : null,
+                questionText: qText,
+                optionA: optA,
+                optionB: optB,
+                optionC: optC,
+                optionD: optD,
+                correctAnswer: ans,
+                explanation: exp,
+                difficulty: existing.difficulty,
+                approved: true
+            };
+
+            try {
+                const updated = await apiFetch(`/api/questions/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(body)
+                });
+                if (updated) {
+                    showToast('Question updated and approved!', 'success');
+                    existing.approved = true;
+                    renderReviewScreen();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function deletePendingQuestion(id) {
+            if (!confirm('Are you sure you want to delete this question?')) return;
+            try {
+                await apiFetch(`/api/questions/${id}`, { method: 'DELETE' });
+                pendingQuestions = pendingQuestions.filter(q => q.id !== id);
+                showToast('Question deleted', 'info');
+                renderReviewScreen();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function approveAllPending() {
+            for (const q of pendingQuestions) {
+                if (!q.approved) {
+                    await saveAndApproveQuestion(q.id);
+                }
+            }
+            showToast('All pending questions approved into Question Bank!', 'success');
+        }
+
+        async function quickCreateAndPublishAssessment() {
+            if (pendingQuestions.length === 0) {
+                showToast('No questions available to create an assessment', 'warning');
+                return;
+            }
+
+            // Approve all questions first
+            await approveAllPending();
+
+            const firstQ = pendingQuestions[0];
+            const targetSubjectId = firstQ.subject.id;
+
+            // Filter pending questions strictly by targetSubjectId to ensure complete subject isolation
+            const subjectQuestions = pendingQuestions.filter(q => q.subject && q.subject.id === targetSubjectId);
+
+            const subjectName = firstQ.subject.name;
+            const topicName = firstQ.topic ? firstQ.topic.name : 'General';
+            const title = `${subjectName} - ${topicName} Assessment`;
+
+            const questionItems = subjectQuestions.map(q => ({
+                questionId: q.id,
+                marks: 3
+            }));
+
+            const totalMarks = questionItems.length * 3;
+
+            const body = {
+                title,
+                description: `Assessment covering ${topicName} under ${subjectName}. Duration: 15 minutes.`,
+                subjectId: targetSubjectId,
+                durationMinutes: 15,
+                totalMarks,
+                shuffleQuestions: false,
+                shuffleOptions: false,
+                questionItems
+            };
+
+            try {
+                showLoading('#quick-create-btn');
+                const created = await apiFetch('/api/assessments', {
+                    method: 'POST',
+                    body: JSON.stringify(body)
+                });
+
+                if (created) {
+                    const pub = await apiFetch(`/api/assessments/${created.id}/publish`, { method: 'POST' });
+                    hideLoading('#quick-create-btn');
+
+                    if (pub && pub.shareToken) {
+                        quickShareUrl = `${window.location.origin}/test.html?code=${pub.shareToken}`;
+                        document.getElementById('quick-share-input').value = quickShareUrl;
+                        document.getElementById('quick-publish-banner').style.display = 'block';
+                        showToast('Assessment created & published!', 'success');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
+            } catch (err) {
+                hideLoading('#quick-create-btn');
+            }
+        }
+
+        function copyQuickLink() {
+            if (!quickShareUrl) return;
+            navigator.clipboard.writeText(quickShareUrl);
+            showToast("Test link copied successfully.", "success");
+        }
+
+        function openQuickTest() {
+            if (!quickShareUrl) return;
+            window.open(quickShareUrl, '_blank');
+        }
+    </script>
+</body>
+</html>

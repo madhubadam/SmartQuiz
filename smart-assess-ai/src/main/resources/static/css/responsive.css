@@ -1,0 +1,38 @@
+/* SmartAssess AI - Responsive Layout Adaptations */
+
+@media (max-width: 992px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+    }
+
+    .nav-links {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .nav-item a {
+        white-space: nowrap;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-navbar {
+        padding: 0 1rem;
+    }
+
+    .content-body {
+        padding: 1rem;
+    }
+
+    .grid-stats {
+        grid-template-columns: 1fr;
+    }
+}

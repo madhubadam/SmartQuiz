@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartQuiz-BVCE - Next-Gen College Assessment Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+</head>
+<body style="background: var(--bg-dark);">
+
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: radial-gradient(circle at top center, rgba(180, 138, 60, 0.12), transparent 70%);">
+        <div class="card" style="width: 100%; max-width: 490px; background: #ffffff; border: 1.5px solid #cbd5e1; box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.1), 0 0 30px rgba(180, 138, 60, 0.15); padding: 2.25rem;">
+            
+            <!-- Header Brand Box -->
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="brand-icon" style="width: 56px; height: 56px; margin: 0 auto 1.25rem auto; font-size: 1.65rem; background: linear-gradient(135deg, #0f172a, #1e293b); border: 1.5px solid #d4af37; box-shadow: 0 6px 20px rgba(180, 138, 60, 0.3);">⚡</div>
+                
+                <h1 style="font-size: 1.95rem; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                    <span>SmartQuiz</span>
+                    <span style="background: linear-gradient(135deg, #b48a3c, #98722c); color: #ffffff; padding: 0.18rem 0.65rem; border-radius: 10px; font-size: 0.85em; font-weight: 800; box-shadow: 0 4px 14px rgba(180, 138, 60, 0.35); text-shadow: 0 1px 2px rgba(0,0,0,0.2);">BVCE</span>
+                </h1>
+                
+                <p style="color: #475569; margin-top: 0.65rem; font-size: 0.94rem; font-weight: 600;">Automated College Assessment Engine with Gemini AI</p>
+            </div>
+
+            <!-- Login / Register Tab Switcher -->
+            <div style="display: flex; gap: 0.5rem; background: #f1f5f9; padding: 0.35rem; border-radius: var(--radius-md); border: 1.5px solid #cbd5e1; margin-bottom: 1.75rem;">
+                <button id="tab-login" class="btn" style="flex: 1; background: #0f172a; color: #ffffff; font-weight: 700; border: 1px solid #d4af37;" onclick="switchAuthTab('login')">Sign In</button>
+                <button id="tab-register" class="btn" style="flex: 1; background: transparent; color: #475569; font-weight: 700;" onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label style="color: #0f172a; font-weight: 700;">Email Address</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="faculty@example.com" required style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-weight: 600;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #0f172a; font-weight: 700;">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-weight: 600;">
+                </div>
+                <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem; font-size: 1rem; padding: 0.85rem;">Sign In</button>
+            </form>
+
+            <!-- Registration Form -->
+            <form id="register-form" style="display: none;">
+                <div class="form-group">
+                    <label style="color: #0f172a; font-weight: 700;">Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="Dr. Sarah Jenkins" required style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-weight: 600;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #0f172a; font-weight: 700;">Email Address</label>
+                    <input type="email" id="reg-email" class="form-control" placeholder="sarah@college.edu" required style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-weight: 600;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #0f172a; font-weight: 700;">Password</label>
+                    <input type="password" id="reg-password" class="form-control" placeholder="Min. 8 characters" required minlength="8" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-weight: 600;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #0f172a; font-weight: 700;">Account Role</label>
+                    <select id="reg-role" class="form-control" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-weight: 600;">
+                        <option value="FACULTY">Faculty / Educator</option>
+                        <option value="STUDENT">Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="color: #0f172a; font-weight: 700;">College / Roll ID (Optional)</label>
+                    <input type="text" id="reg-college" class="form-control" placeholder="FAC-8890 / STU-2024" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-weight: 600;">
+                </div>
+                <button type="submit" id="reg-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem; font-size: 1rem; padding: 0.85rem;">Create Account</button>
+            </form>
+
+            <!-- Quick Demo Credentials Box -->
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1.5px solid #e2e8f0; text-align: center;">
+                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 0.85rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">Quick Demo Credentials</p>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button class="btn btn-secondary" style="flex: 1; font-size: 0.85rem; font-weight: 700;" onclick="fillDemo('faculty@example.com', 'Faculty@123')">🔑 Faculty Demo</button>
+                    <button class="btn btn-secondary" style="flex: 1; font-size: 0.85rem; font-weight: 700;" onclick="fillDemo('student@example.com', 'Student@123')">🎓 Student Demo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabReg = document.getElementById('tab-register');
+
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                regForm.style.display = 'none';
+                tabLogin.style.background = '#0f172a';
+                tabLogin.style.color = '#ffffff';
+                tabLogin.style.border = '1px solid #d4af37';
+                tabReg.style.background = 'transparent';
+                tabReg.style.color = '#475569';
+                tabReg.style.border = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                regForm.style.display = 'block';
+                tabReg.style.background = '#0f172a';
+                tabReg.style.color = '#ffffff';
+                tabReg.style.border = '1px solid #d4af37';
+                tabLogin.style.background = 'transparent';
+                tabLogin.style.color = '#475569';
+                tabLogin.style.border = 'none';
+            }
+        }
+
+        function fillDemo(email, pass) {
+            switchAuthTab('login');
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = pass;
+            showToast(`Filled demo credentials for ${email}`, 'info');
+        }
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                showLoading('#login-btn');
+                const res = await apiFetch('/api/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (res) {
+                    setAuthToken(res.token, res);
+                    showToast(`Welcome back, ${res.name}!`, 'success');
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectCode = urlParams.get('redirect_code');
+                    if (redirectCode) {
+                        window.location.href = `test.html?code=${redirectCode}`;
+                        return;
+                    }
+
+                    if (res.role === 'FACULTY') {
+                        window.location.href = 'faculty-dashboard.html';
+                    } else {
+                        window.location.href = 'student-dashboard.html';
+                    }
+                }
+            } catch (err) {
+                hideLoading('#login-btn');
+            }
+        };
+
+        document.getElementById('register-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const role = document.getElementById('reg-role').value;
+            const collegeId = document.getElementById('reg-college').value;
+
+            try {
+                showLoading('#reg-btn');
+                const res = await apiFetch('/api/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, password, role, collegeId })
+                });
+
+                if (res) {
+                    setAuthToken(res.token, res);
+                    showToast('Account registered successfully!', 'success');
+                    if (res.role === 'FACULTY') {
+                        window.location.href = 'faculty-dashboard.html';
+                    } else {
+                        window.location.href = 'student-dashboard.html';
+                    }
+                }
+            } catch (err) {
+                hideLoading('#reg-btn');
+            }
+        };
+
+        // Redirect if already logged in
+        const currentUser = getCurrentUser();
+        if (currentUser && getAuthToken()) {
+            if (currentUser.role === 'FACULTY') window.location.href = 'faculty-dashboard.html';
+            else window.location.href = 'student-dashboard.html';
+        }
+    </script>
+</body>
+</html>

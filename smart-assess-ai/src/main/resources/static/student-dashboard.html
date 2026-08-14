@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - SmartAssess AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="student-dashboard.html" class="brand">
+                <div class="brand-icon">🎓</div>
+                SmartQuiz-BVCE
+            </a>
+            <ul class="nav-links">
+                <li class="nav-item active"><a href="student-dashboard.html">📊 My Dashboard</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-navbar">
+                <h2 style="font-weight: 700; font-size: 1.25rem;">Student Dashboard</h2>
+                <div class="user-profile">
+                    <span class="user-badge" id="user-role-display">STUDENT</span>
+                    <span id="user-name-display" style="font-weight: 600;">Alex Rivera</span>
+                    <button class="btn btn-secondary" onclick="logout()" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Quick Stats Grid -->
+                <div class="grid-stats">
+                    <div class="card stat-card">
+                        <div>
+                            <div class="stat-label">Completed Attempts</div>
+                            <div class="stat-val" id="student-attempts-val">0</div>
+                        </div>
+                        <div style="font-size: 2rem;">📝</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div>
+                            <div class="stat-label">Average Score Percentage</div>
+                            <div class="stat-val" id="student-avg-val" style="color:var(--secondary);">0%</div>
+                        </div>
+                        <div style="font-size: 2rem;">📈</div>
+                    </div>
+                </div>
+
+                <!-- Active Test Code Launcher -->
+                <div class="card" style="margin-bottom:2rem; background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), var(--bg-card));">
+                    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:0.5rem;">Have a Shareable Test Code?</h3>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1rem;">Enter the 6-character code provided by your faculty instructor (e.g. <code>8F7K2P</code>) to start your test session.</p>
+                    <div style="display:flex; gap:0.75rem; max-width:400px;">
+                        <input type="text" id="share-code-input" class="form-control" placeholder="Enter Code (e.g. 8F7K2P)" style="text-transform:uppercase; letter-spacing:1px; font-weight:bold;">
+                        <button class="btn btn-primary" onclick="launchTestByCode()">Start Test</button>
+                    </div>
+                </div>
+
+                <!-- Test History Table -->
+                <div class="card">
+                    <h3 style="margin-bottom:1rem; font-size:1.1rem; font-weight:700;">Completed Assessment History</h3>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Assessment Title</th>
+                                    <th>Date Taken</th>
+                                    <th>Score</th>
+                                    <th>Percentage</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-history-table">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        checkAuth('STUDENT');
+        document.addEventListener('DOMContentLoaded', loadStudentDashboard);
+
+        function launchTestByCode() {
+            const code = document.getElementById('share-code-input').value.trim();
+            if (!code) {
+                showToast('Please enter a valid test code', 'warning');
+                return;
+            }
+            window.location.href = `test.html?code=${code}`;
+        }
+    </script>
+</body>
+</html>

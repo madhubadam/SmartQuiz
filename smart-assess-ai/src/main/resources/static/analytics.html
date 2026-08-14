@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Class Analytics - SmartAssess AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="faculty-dashboard.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                SmartQuiz-BVCE
+            </a>
+            <ul class="nav-links">
+                <li class="nav-item"><a href="faculty-dashboard.html">📊 Dashboard</a></li>
+                <li class="nav-item"><a href="question-generator.html">✨ AI Generator</a></li>
+                <li class="nav-item"><a href="question-bank.html">📚 Question Bank</a></li>
+                <li class="nav-item"><a href="create-assessment.html">📝 New Assessment</a></li>
+                <li class="nav-item active"><a href="analytics.html">📈 Class Analytics</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-navbar">
+                <h2 style="font-weight: 700; font-size: 1.25rem;">Faculty Class Performance Analytics</h2>
+                <div class="user-profile">
+                    <span class="user-badge" id="user-role-display">FACULTY</span>
+                    <span id="user-name-display" style="font-weight: 600;">Dr. Sarah Jenkins</span>
+                    <button class="btn btn-secondary" onclick="logout()" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-body" id="analytics-content">
+                <!-- Assessment Selector Header -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                    <div>
+                        <h3 style="font-size:1.2rem; font-weight:700;">Select Assessment for Analysis</h3>
+                    </div>
+                    <div style="min-width:280px;">
+                        <select id="assessment-selector" class="form-control" style="font-weight:600;"></select>
+                    </div>
+                </div>
+
+                <!-- Stats Overview Grid -->
+                <div class="grid-stats">
+                    <div class="card stat-card">
+                        <div>
+                            <div class="stat-label">Students Attempted</div>
+                            <div class="stat-val" id="total-students-attempted">0</div>
+                        </div>
+                        <div style="font-size:2rem;">👥</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div>
+                            <div class="stat-label">Total Attempts</div>
+                            <div class="stat-val" id="total-attempts">0</div>
+                        </div>
+                        <div style="font-size:2rem;">📝</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div>
+                            <div class="stat-label">Average Score</div>
+                            <div class="stat-val" id="average-score" style="color:var(--secondary);">0</div>
+                        </div>
+                        <div style="font-size:2rem;">📊</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div>
+                            <div class="stat-label">Pass Percentage</div>
+                            <div class="stat-val" id="pass-percentage" style="color:var(--success);">0%</div>
+                        </div>
+                        <div style="font-size:2rem;">🎯</div>
+                    </div>
+                </div>
+
+                <!-- AI Performance Insights Panel -->
+                <div class="card" id="ai-insights-box" style="margin-bottom:2rem; background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), var(--bg-card)); border-color: rgba(6, 182, 212, 0.3);">
+                    <!-- AI Insights rendered dynamically -->
+                </div>
+
+                <!-- Chart Visualizations Grid -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+                    <div class="card">
+                        <h4 style="font-size:0.95rem; font-weight:700; color:var(--text-secondary); margin-bottom:1rem;">STUDENT SCORE DISTRIBUTION</h4>
+                        <canvas id="chart-scores" height="220"></canvas>
+                    </div>
+
+                    <div class="card">
+                        <h4 style="font-size:0.95rem; font-weight:700; color:var(--text-secondary); margin-bottom:1rem;">ACCURACY BREAKDOWN (CORRECT VS WRONG)</h4>
+                        <canvas id="chart-doughnut" height="220"></canvas>
+                    </div>
+
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <h4 style="font-size:0.95rem; font-weight:700; color:var(--text-secondary); margin-bottom:1rem;">TOPIC-WISE PERFORMANCE ACCURACY (%)</h4>
+                        <canvas id="chart-topics" height="150"></canvas>
+                    </div>
+                </div>
+
+                <!-- Student Performance Table -->
+                <div class="card">
+                    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">Student Attempts Log</h3>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Email</th>
+                                    <th>Score</th>
+                                    <th>Percentage</th>
+                                    <th>Attempts</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-performance-table">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/analytics.js"></script>
+    <script>
+        checkAuth('FACULTY');
+        document.addEventListener('DOMContentLoaded', loadAnalyticsPage);
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Result - SmartAssess AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="student-dashboard.html" class="brand">
+                <div class="brand-icon">🎓</div>
+                SmartQuiz-BVCE
+            </a>
+            <ul class="nav-links">
+                <li class="nav-item"><a href="student-dashboard.html">📊 My Dashboard</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-navbar">
+                <h2 style="font-weight: 700; font-size: 1.25rem;">Test Submission Breakdown</h2>
+                <div class="user-profile">
+                    <button class="btn btn-secondary" onclick="window.location.href='student-dashboard.html'" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Back to Dashboard</button>
+                </div>
+            </header>
+
+            <div class="content-body" style="max-width:900px; margin:0 auto;">
+                <!-- Summary Card -->
+                <div class="card" style="text-align:center; padding:2.5rem 2rem; margin-bottom:2rem; background: linear-gradient(135deg, rgba(79,70,229,0.1), var(--bg-card));">
+                    <div style="font-size:3rem; margin-bottom:0.5rem;" id="result-icon">🎯</div>
+                    <h2 id="performance-level" style="font-size:1.75rem; font-weight:800; color:var(--text-primary); margin-bottom:0.5rem;">Evaluating...</h2>
+                    
+                    <div style="font-size:3.5rem; font-weight:900; background: linear-gradient(135deg, var(--primary-light), var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0.5rem 0;">
+                        <span id="score-val">0</span> / <span id="total-val">0</span>
+                    </div>
+                    <div style="font-size:1.25rem; font-weight:700; color:var(--secondary);" id="percentage-val">0%</div>
+
+                    <div style="display:flex; justify-content:center; gap:2rem; margin-top:2rem; flex-wrap:wrap;">
+                        <div style="background:var(--bg-dark); padding:1rem 1.5rem; border-radius:var(--radius-md); min-width:130px;">
+                            <div style="font-size:0.8rem; color:var(--success); font-weight:700;">CORRECT</div>
+                            <div id="correct-count" style="font-size:1.5rem; font-weight:800;">0</div>
+                        </div>
+                        <div style="background:var(--bg-dark); padding:1rem 1.5rem; border-radius:var(--radius-md); min-width:130px;">
+                            <div style="font-size:0.8rem; color:var(--danger); font-weight:700;">WRONG</div>
+                            <div id="wrong-count" style="font-size:1.5rem; font-weight:800;">0</div>
+                        </div>
+                        <div style="background:var(--bg-dark); padding:1rem 1.5rem; border-radius:var(--radius-md); min-width:130px;">
+                            <div style="font-size:0.8rem; color:var(--warning); font-weight:700;">UNANSWERED</div>
+                            <div id="unanswered-count" style="font-size:1.5rem; font-weight:800;">0</div>
+                        </div>
+                        <div style="background:var(--bg-dark); padding:1rem 1.5rem; border-radius:var(--radius-md); min-width:130px;">
+                            <div style="font-size:0.8rem; color:var(--text-secondary); font-weight:700;">TIME TAKEN</div>
+                            <div id="time-taken-val" style="font-size:0.95rem; font-weight:700; margin-top:0.35rem;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Question Breakdown -->
+                <div class="card">
+                    <h3 style="font-size:1.2rem; font-weight:700; margin-bottom:1.5rem;">Question-by-Question Review</h3>
+                    <div id="question-review-list" style="display:flex; flex-direction:column; gap:1.25rem;">
+                        <!-- Question review cards rendered here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const attemptId = urlParams.get('attemptId');
+
+            if (!attemptId) {
+                showToast('Attempt ID missing', 'error');
+                return;
+            }
+
+            try {
+                const res = await apiFetch(`/api/results/${attemptId}`);
+                if (!res) return;
+
+                document.getElementById('score-val').innerText = res.score;
+                document.getElementById('total-val').innerText = res.totalMarks;
+                document.getElementById('percentage-val').innerText = `${res.percentage}% Percentage`;
+                document.getElementById('performance-level').innerText = `Performance: ${res.performanceLevel}`;
+                document.getElementById('correct-count').innerText = res.correct;
+                document.getElementById('wrong-count').innerText = res.wrong;
+                document.getElementById('unanswered-count').innerText = res.unanswered;
+                document.getElementById('time-taken-val').innerText = res.timeTaken;
+
+                const iconEl = document.getElementById('result-icon');
+                if (res.percentage >= 85) iconEl.innerText = '🏆';
+                else if (res.percentage >= 70) iconEl.innerText = '🌟';
+                else if (res.percentage >= 50) iconEl.innerText = '👍';
+                else iconEl.innerText = '⚠️';
+
+                const list = document.getElementById('question-review-list');
+                list.innerHTML = '';
+
+                if (res.questionResults) {
+                    res.questionResults.forEach((q, idx) => {
+                        const card = document.createElement('div');
+                        card.style.cssText = `
+                            padding: 1.25rem;
+                            border-radius: var(--radius-md);
+                            background: var(--bg-dark);
+                            border: 1px solid ${q.correct ? 'rgba(16,185,129,0.3)' : (q.selectedAnswer == null ? 'var(--border-color)' : 'rgba(239,68,68,0.3)')};
+                        `;
+
+                        card.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                <span style="font-weight:700;">Question #${idx + 1}</span>
+                                <span class="badge ${q.correct ? 'badge-published' : (q.selectedAnswer == null ? 'badge-draft' : 'badge-closed')}">
+                                    ${q.correct ? `+${q.marksObtained} Marks (Correct)` : (q.selectedAnswer == null ? 'Unanswered (0 Marks)' : 'Incorrect (0 Marks)')}
+                                </span>
+                            </div>
+
+                            <p style="font-weight:600; font-size:0.95rem; margin-bottom:1rem;">${q.questionText}</p>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; font-size:0.88rem; margin-bottom:0.75rem;">
+                                <div style="${getOptionStyle('A', q)}">A: ${q.optionA}</div>
+                                <div style="${getOptionStyle('B', q)}">B: ${q.optionB}</div>
+                                <div style="${getOptionStyle('C', q)}">C: ${q.optionC}</div>
+                                <div style="${getOptionStyle('D', q)}">D: ${q.optionD}</div>
+                            </div>
+
+                            ${q.explanation ? `<div style="font-size:0.83rem; color:var(--text-secondary); border-top:1px solid var(--border-color); padding-top:0.5rem; margin-top:0.5rem;">💡 <strong>Explanation:</strong> ${q.explanation}</div>` : ''}
+                        `;
+                        list.appendChild(card);
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        function getOptionStyle(optKey, q) {
+            if (q.correctAnswer === optKey) {
+                return 'color:var(--success); font-weight:bold; background:rgba(16,185,129,0.1); padding:0.4rem; border-radius:4px;';
+            }
+            if (q.selectedAnswer === optKey && !q.correct) {
+                return 'color:var(--danger); font-weight:bold; background:rgba(239,68,68,0.1); padding:0.4rem; border-radius:4px; text-decoration:line-through;';
+            }
+            return 'padding:0.4rem; color:var(--text-muted);';
+        }
+    </script>
+</body>
+</html>

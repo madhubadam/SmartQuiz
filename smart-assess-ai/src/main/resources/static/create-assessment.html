@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Assessment - SmartAssess AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="faculty-dashboard.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                SmartQuiz-BVCE
+            </a>
+            <ul class="nav-links">
+                <li class="nav-item"><a href="faculty-dashboard.html">📊 Dashboard</a></li>
+                <li class="nav-item"><a href="question-generator.html">✨ AI Generator</a></li>
+                <li class="nav-item"><a href="question-bank.html">📚 Question Bank</a></li>
+                <li class="nav-item active"><a href="create-assessment.html">📝 New Assessment</a></li>
+                <li class="nav-item"><a href="analytics.html">📈 Class Analytics</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-navbar">
+                <h2 style="font-weight: 700; font-size: 1.25rem;">Create New Assessment</h2>
+                <div class="user-profile">
+                    <span class="user-badge" id="user-role-display">FACULTY</span>
+                    <span id="user-name-display" style="font-weight: 600;">Dr. Sarah Jenkins</span>
+                    <button class="btn btn-secondary" onclick="logout()" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <form id="create-assessment-form">
+                    <!-- Assessment Header Configuration -->
+                    <div class="card" style="margin-bottom:1.5rem;">
+                        <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">Assessment Configuration</h3>
+                        
+                        <div class="form-group">
+                            <label>Assessment Title</label>
+                            <input type="text" id="assess-title" class="form-control" placeholder="e.g. Data Warehousing Mid-term Exam" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description & Instructions</label>
+                            <textarea id="assess-desc" class="form-control" rows="2" placeholder="e.g. Test covering OLAP, ETL, and Star Schemas. Time limit: 15 mins."></textarea>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                            <div class="form-group">
+                                <label>Subject</label>
+                                <select id="assess-subject" class="form-control" required onchange="loadQuestionsForSubject(this.value)">
+                                    <option value="">Select Subject...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Test Duration (Minutes)</label>
+                                <input type="number" id="assess-duration" class="form-control" value="15" min="1" required>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:1.5rem; margin-top:1rem;">
+                            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                                <input type="checkbox" id="assess-shuffle-q" checked> Randomize Question Order
+                            </label>
+                            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                                <input type="checkbox" id="assess-shuffle-opt" checked> Randomize Option Order
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question Picker Section -->
+                    <div class="card" style="margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                            <h3 style="font-size:1.1rem; font-weight:700;">Select Questions from Bank</h3>
+                            <div>
+                                Selected: <strong id="selected-count-label" style="color:var(--secondary);">0</strong> questions 
+                                (<strong id="total-marks-label" style="color:var(--success);">0</strong> total marks)
+                            </div>
+                        </div>
+
+                        <div id="picker-questions-list" style="display:flex; flex-direction:column; gap:0.75rem; max-height:400px; overflow-y:auto;">
+                            <p style="text-align:center; color:var(--text-muted); padding:2rem;">Select a subject above to load available approved questions.</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:1rem;">
+                        <button type="submit" id="save-btn" class="btn btn-primary">Save Assessment</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        checkAuth('FACULTY');
+        let availableQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const subjects = await apiFetch('/api/subjects');
+            if (subjects) {
+                const subSelect = document.getElementById('assess-subject');
+                subjects.forEach(s => {
+                    subSelect.appendChild(new Option(s.name, s.id));
+                });
+            }
+        });
+
+        async function loadQuestionsForSubject(subjectId) {
+            if (!subjectId) return;
+            const questions = await apiFetch(`/api/questions?subjectId=${subjectId}`);
+            availableQuestions = questions ? questions.filter(q => q.approved) : [];
+
+            const container = document.getElementById('picker-questions-list');
+            container.innerHTML = '';
+
+            if (availableQuestions.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:2rem;">No approved questions found for this subject. Use the AI Generator to add questions first.</p>`;
+                return;
+            }
+
+            availableQuestions.forEach(q => {
+                const row = document.createElement('div');
+                row.className = 'card';
+                row.style.cssText = 'padding:0.75rem 1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--bg-dark);';
+
+                row.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:0.75rem; flex:1;">
+                        <input type="checkbox" class="q-checkbox" value="${q.id}" onchange="updateSelectedTotals()">
+                        <div>
+                            <div style="font-weight:600; font-size:0.9rem;">${q.questionText}</div>
+                            <span class="badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <label style="font-size:0.8rem; color:var(--text-muted);">Marks:</label>
+                        <input type="number" class="q-marks form-control" data-qid="${q.id}" value="3" min="1" style="width:65px; padding:0.25rem 0.5rem; text-align:center;" onchange="updateSelectedTotals()">
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            updateSelectedTotals();
+        }
+
+        function updateSelectedTotals() {
+            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
+            let totalMarks = 0;
+
+            checkboxes.forEach(cb => {
+                const qId = cb.value;
+                const marksInput = document.querySelector(`.q-marks[data-qid="${qId}"]`);
+                const marks = marksInput ? parseInt(marksInput.value, 10) || 1 : 1;
+                totalMarks += marks;
+            });
+
+            document.getElementById('selected-count-label').innerText = checkboxes.length;
+            document.getElementById('total-marks-label').innerText = totalMarks;
+        }
+
+        document.getElementById('create-assessment-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('assess-title').value;
+            const description = document.getElementById('assess-desc').value;
+            const subjectId = parseInt(document.getElementById('assess-subject').value, 10);
+            const durationMinutes = parseInt(document.getElementById('assess-duration').value, 10);
+            const shuffleQuestions = document.getElementById('assess-shuffle-q').checked;
+            const shuffleOptions = document.getElementById('assess-shuffle-opt').checked;
+
+            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showToast('Please select at least one question for the assessment', 'warning');
+                return;
+            }
+
+            const questionItems = [];
+            let totalMarks = 0;
+            checkboxes.forEach(cb => {
+                const qId = parseInt(cb.value, 10);
+                const marksInput = document.querySelector(`.q-marks[data-qid="${qId}"]`);
+                const marks = marksInput ? parseInt(marksInput.value, 10) || 1 : 1;
+                totalMarks += marks;
+                questionItems.push({ questionId: qId, marks });
+            });
+
+            const body = {
+                title,
+                description,
+                subjectId,
+                durationMinutes,
+                totalMarks,
+                shuffleQuestions,
+                shuffleOptions,
+                questionItems
+            };
+
+            try {
+                showLoading('#save-btn');
+                const created = await apiFetch('/api/assessments', {
+                    method: 'POST',
+                    body: JSON.stringify(body)
+                });
+
+                if (created) {
+                    showToast('Assessment saved successfully!', 'success');
+                    if (confirm("Would you like to publish this assessment immediately to generate a student share link?")) {
+                        const pub = await apiFetch(`/api/assessments/${created.id}/publish`, { method: 'POST' });
+                        if (pub) showToast(`Published! Share Code: ${pub.shareToken}`, 'success');
+                    }
+                    setTimeout(() => window.location.href = 'faculty-dashboard.html', 1200);
+                }
+            } catch (err) {
+                hideLoading('#save-btn');
+            }
+        };
+    </script>
+</body>
+</html>
